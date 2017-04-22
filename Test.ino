@@ -1,3 +1,18 @@
+/*
+  Underwater glider test code
+  Tests the movement assemblies of the glider
+  
+  A4988 Hookup:
+  Gearbox motor step pin = Pin 3
+  Gearbox motor direction pin = Pin 4
+  
+  Acme screw motor step pin = Pin 5
+  Acme screw motor direction pin = Pin 6
+  
+  Engine motor step pin = Pin 7
+  Engine motor direction pin = Pin 8
+*/
+
 const int stepGearboxPin = 3;
 const int dirGearboxPin = 4;
 
