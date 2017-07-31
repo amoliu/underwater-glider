@@ -15,6 +15,8 @@ def initialise():
 
     root = Tk();
     root.bind("<KeyRelease>", keyUp);
+    
+    root.mainloop();
 
 if __name__ == "__main__":
     initialise();
