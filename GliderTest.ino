@@ -10,12 +10,19 @@ const int stepEnginePin = 6;
 const int dirEnginePin = 7;
 const int endStopEnginePin = 15;
 
+
+const int forwardDir = 0;
+const int reverseDir = 1;
+  
 int rollPos;
 int rollMax = 1000;
+int rollDelay = 900;
 int pitchPos;
 int pitchMax = 3500;
+int pitchDelay = 600;
 int enginePos;
 int engineMax = 22000;
+int engineDelay = 900;
 
 void setup() {
   pinMode(stepRollPin, OUTPUT);
@@ -41,7 +48,7 @@ boolean dirForward(int dir) {
   return(dir == 0);
 }
 
-int runMotor(int dir, int stepPin, int dirPin, int endStop, int amountToMove, int currentPos, int maxPos) {
+int runMotor(int stepPin, int dirPin, int endStop, int dir, int amountToMove, int currentPos, int maxPos, int motorDelay) {
   digitalWrite(dirPin, dir);
   for (int x = 0; x < amountToMove; x++) {
     if (dirForward(dir) && reachedEndStop(endStop) ) {
@@ -52,9 +59,9 @@ int runMotor(int dir, int stepPin, int dirPin, int endStop, int amountToMove, in
     } 
     
     digitalWrite(stepPin, HIGH);
-    delayMicroseconds(1200);
+    delayMicroseconds(motorDelay);
     digitalWrite(stepPin, LOW);
-    delayMicroseconds(1200);
+    delayMicroseconds(motorDelay);
     
     if (dirForward(dir)) {
       currentPos += -1;
@@ -84,12 +91,23 @@ void diagnosticOutput () {
 }
 
 void homeAll () {
-//  rollPos = runMotor(0, stepRollPin, dirRollPin, endStopRollPin, rollMax, rollPos, rollMax);
-//  rollPos = runMotor(1, stepRollPin, dirRollPin, endStopRollPin, rollMax * .1, rollPos, rollMax);
-  pitchPos = runMotor(0, stepPitchPin, dirPitchPin, endStopPitchPin, pitchMax, pitchPos, pitchMax);
-  pitchPos = runMotor(1, stepPitchPin, dirPitchPin, endStopPitchPin, pitchMax * 0.5, pitchPos, pitchMax);
-  enginePos = runMotor(0, stepEnginePin, dirEnginePin, endStopEnginePin, engineMax, enginePos, engineMax);
-  enginePos = runMotor(1, stepEnginePin, dirEnginePin, endStopEnginePin, engineMax * 1.0, enginePos, engineMax);
+  // home, move the motors the maximum distance towards the endstop, if the actuator is closer than the far end the endstop will stop movement
+  // rollPos = runMotor(stepRollPin, dirRollPin, endStopRollPin, forwardDir, rollMax, rollPos, rollMax, rollDelay);
+  pitchPos = runMotor(stepPitchPin, dirPitchPin, endStopPitchPin, forwardDir, pitchMax, pitchPos, pitchMax, pitchDelay);
+  enginePos = runMotor(stepEnginePin, dirEnginePin, endStopEnginePin, forwardDir, engineMax, enginePos, engineMax, engineDelay);
+  
+  // initial phase
+  // rollPos = runMotor(stepRollPin, dirRollPin, endStopRollPin, reverseDir, rollMax * .1, rollPos, rollMax, rollDelay);
+  pitchPos = runMotor(stepPitchPin, dirPitchPin, endStopPitchPin, reverseDir, pitchMax * 0.5, pitchPos, pitchMax, pitchDelay);
+ enginePos = runMotor(stepEnginePin, dirEnginePin, endStopEnginePin, reverseDir, engineMax * 0.1, enginePos, engineMax, engineDelay);
+
+  // next phase 
+ // delay(5*1000);
+//  enginePos = runMotor(stepEnginePin, dirEnginePin, endStopEnginePin, forwardDir, engineMax * 1.0, enginePos, engineMax, engineDelay);
+//  pitchPos = runMotor(stepPitchPin, dirPitchPin, endStopPitchPin, forwardDir, pitchMax * 0.4, pitchPos, pitchMax, pitchDelay);
+
+
+  
   
 }
 
@@ -102,27 +120,27 @@ void loop() {
     switch (inByte){
       case 1:
         Serial.println("Disabled Rotating mass clockwise");
-        //rollPos = runMotor(1, stepRollPin, dirRollPin, endStopRollPin, 100, rollPos, rollMax);
+        rollPos = runMotor(stepRollPin, dirRollPin, endStopRollPin, reverseDir, 5, rollPos, rollMax, rollDelay);
         break;
       case 2:
         Serial.println("Disabled Rotating mass anticlockwise");
-        //rollPos = runMotor(0, stepRollPin, dirRollPin, endStopRollPin, 100, rollPos, rollMax);
+        rollPos = runMotor(stepRollPin, dirRollPin, endStopRollPin, forwardDir, 5, rollPos, rollMax, rollDelay);
         break;
       case 3:
         Serial.println("Mass forward");
-        pitchPos = runMotor(0, stepPitchPin, dirPitchPin, endStopPitchPin, 50, pitchPos, pitchMax);
+        pitchPos = runMotor(stepPitchPin, dirPitchPin, endStopPitchPin, forwardDir, 50, pitchPos, pitchMax, pitchDelay);
         break;
       case 4:
         Serial.println("Mass backward");
-        pitchPos = runMotor(1, stepPitchPin, dirPitchPin, endStopPitchPin, 50, pitchPos, pitchMax);
+        pitchPos = runMotor(stepPitchPin, dirPitchPin, endStopPitchPin, reverseDir, 50, pitchPos, pitchMax, pitchDelay);
         break;
       case 5:
-        Serial.println("Plunger forward");
-        enginePos = runMotor(1, stepEnginePin, dirEnginePin, endStopEnginePin, 100, enginePos, engineMax);
+        Serial.println("Plunger backward");
+        enginePos = runMotor(stepEnginePin, dirEnginePin, endStopEnginePin, reverseDir, 100, enginePos, engineMax, engineDelay);
         break;
       case 6:
-        Serial.println("Plunger backward");
-        enginePos = runMotor(0, stepEnginePin, dirEnginePin, endStopEnginePin, 100, enginePos, engineMax);
+        Serial.println("Plunger forward");
+        enginePos = runMotor(stepEnginePin, dirEnginePin, endStopEnginePin, forwardDir, 100, enginePos, engineMax, engineDelay);
         break;
       default:
         Serial.println("None");
