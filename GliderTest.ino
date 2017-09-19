@@ -1,28 +1,28 @@
 const int stepRollPin = 4;
 const int dirRollPin = 5;
-const int endStopRollPin = 14;
+const int endStopRollPin = 30;
 
-const int stepPitchPin = 12;
-const int dirPitchPin = 3;
-const int endStopPitchPin = 16;
+const int stepPitchPin = 6;
+const int dirPitchPin = 7;
+const int endStopPitchPin = 31;
 
-const int stepEnginePin = 6;
-const int dirEnginePin = 7;
-const int endStopEnginePin = 15;
+const int stepEnginePin = 8;
+const int dirEnginePin = 9;
+const int endStopEnginePin = 32;
 
 
 const int forwardDir = 0;
 const int reverseDir = 1;
   
 int rollPos;
-int rollMax = 1000;
-int rollDelay = 900;
+int rollMax = 50;
+int rollDelay = 3000;
 int pitchPos;
-int pitchMax = 3500;
-int pitchDelay = 600;
+int pitchMax = 2800;
+int pitchDelay = 900;
 int enginePos;
-int engineMax = 22000;
-int engineDelay = 900;
+int engineMax = 2100;
+int engineDelay = 1200;
 
 void setup() {
   pinMode(stepRollPin, OUTPUT);
@@ -35,6 +35,7 @@ void setup() {
   pinMode(dirEnginePin, OUTPUT);
 
   homeAll();
+  diving();
   
   Serial.begin(115200);
 
@@ -92,23 +93,21 @@ void diagnosticOutput () {
 
 void homeAll () {
   // home, move the motors the maximum distance towards the endstop, if the actuator is closer than the far end the endstop will stop movement
-  // rollPos = runMotor(stepRollPin, dirRollPin, endStopRollPin, forwardDir, rollMax, rollPos, rollMax, rollDelay);
+  //  rollPos = runMotor(stepRollPin, dirRollPin, endStopRollPin, forwardDir, rollMax, rollPos, rollMax, rollDelay);
   pitchPos = runMotor(stepPitchPin, dirPitchPin, endStopPitchPin, forwardDir, pitchMax, pitchPos, pitchMax, pitchDelay);
   enginePos = runMotor(stepEnginePin, dirEnginePin, endStopEnginePin, forwardDir, engineMax, enginePos, engineMax, engineDelay);
-  
-  // initial phase
-  // rollPos = runMotor(stepRollPin, dirRollPin, endStopRollPin, reverseDir, rollMax * .1, rollPos, rollMax, rollDelay);
+
+}
+
+void diving () {
+//  rollPos = runMotor(stepRollPin, dirRollPin, endStopRollPin, reverseDir, rollMax * .1, rollPos, rollMax, rollDelay);
   pitchPos = runMotor(stepPitchPin, dirPitchPin, endStopPitchPin, reverseDir, pitchMax * 0.5, pitchPos, pitchMax, pitchDelay);
- enginePos = runMotor(stepEnginePin, dirEnginePin, endStopEnginePin, reverseDir, engineMax * 0.1, enginePos, engineMax, engineDelay);
-
-  // next phase 
- // delay(5*1000);
-//  enginePos = runMotor(stepEnginePin, dirEnginePin, endStopEnginePin, forwardDir, engineMax * 1.0, enginePos, engineMax, engineDelay);
-//  pitchPos = runMotor(stepPitchPin, dirPitchPin, endStopPitchPin, forwardDir, pitchMax * 0.4, pitchPos, pitchMax, pitchDelay);
-
-
-  
-  
+  while (true){
+  enginePos = runMotor(stepEnginePin, dirEnginePin, endStopEnginePin, reverseDir, engineMax * 1, enginePos, engineMax, engineDelay);
+  delay(3000);
+  enginePos = runMotor(stepEnginePin, dirEnginePin, endStopEnginePin, forwardDir, engineMax * 1, enginePos, engineMax, engineDelay);
+  delay(3000);
+  }
 }
 
 void loop() {
