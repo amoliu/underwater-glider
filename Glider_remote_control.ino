@@ -34,7 +34,6 @@ void setup() {
   pinMode(dirEnginePin, OUTPUT);
 
   homeAll();
-  diving();
 
   Serial.begin(115200);
 
@@ -92,25 +91,11 @@ void diagnosticOutput () {
 
 void homeAll () {
   // home, move the motors the maximum distance towards the endstop, if the actuator is closer than the far end the endstop will stop movement
-  //  rollPos = runMotor(stepRollPin, dirRollPin, endStopRollPin, forwardDir, rollMax, rollPos, rollMax, rollDelay);
+  rollPos = runMotor(stepRollPin, dirRollPin, endStopRollPin, forwardDir, rollMax, rollPos, rollMax, rollDelay);
   pitchPos = runMotor(stepPitchPin, dirPitchPin, endStopPitchPin, forwardDir, pitchMax, pitchPos, pitchMax, pitchDelay);
   enginePos = runMotor(stepEnginePin, dirEnginePin, endStopEnginePin, forwardDir, engineMax, enginePos, engineMax, engineDelay);
 
 }
-
-void diving () {
-  //  rollPos = runMotor(stepRollPin, dirRollPin, endStopRollPin, reverseDir, rollMax * .1, rollPos, rollMax, rollDelay);
-  pitchPos = runMotor(stepPitchPin, dirPitchPin, endStopPitchPin, reverseDir, pitchMax * 0.8, pitchPos, pitchMax, pitchDelay);
-  while (true) {
-    enginePos = runMotor(stepEnginePin, dirEnginePin, endStopEnginePin, reverseDir, engineMax * 1, enginePos, engineMax, engineDelay);
-    delay(3000);
-    pitchPos = runMotor(stepPitchPin, dirPitchPin, endStopPitchPin, forwardDir, pitchMax * 0.6, pitchPos, pitchMax, pitchDelay);
-    enginePos = runMotor(stepEnginePin, dirEnginePin, endStopEnginePin, forwardDir, engineMax * 1, enginePos, engineMax, engineDelay);
-    delay(3000);
-    pitchPos = runMotor(stepPitchPin, dirPitchPin, endStopPitchPin, reverseDir, pitchMax * 0.6, pitchPos, pitchMax, pitchDelay);
-  }
-}
-
 
 void loop() {
 
